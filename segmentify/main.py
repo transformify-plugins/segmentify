@@ -20,8 +20,10 @@ def featurize(image, multichannel=False):
     """
 
     if not multichannel:
-        features = np.concatenate([[image], [gaussian(image, 2)],
-                                   [gaussian(image, 4)]], axis=0)
+        features = np.concatenate([[image],
+                                   [gaussian(image, 2)],
+                                   [gaussian(image, 4)],
+                                   [gaussian(image, 6)]], axis=0)
         features = np.moveaxis(features, 0, -1)
 
     return features
