@@ -6,19 +6,25 @@ import numpy as np
 from napari import Viewer
 from napari.util import app_context
 from skimage import data
-from segmentify import fit, predict
+from segmentify import semantic
+from segmentify import instances as instance
 
 
 coins = data.coins()
 labels = np.zeros(coins.shape, dtype=int)
 
+
 def segment(viewer):
     image = viewer.layers['input'].image
     labels = viewer.layers['train'].image
-    clf = fit(image, labels)
-    segmentation = predict(clf, image)
-    print(np.unique(segmentation))
-    viewer.layers['output'].image = segmentation
+    clf = semantic.fit(image, labels)
+    segmentation = semantic.predict(clf, image)
+    print('classes', len(np.unique(segmentation)))
+    instances = instance.predict(image, segmentation)
+    print('instances', instances.max())
+    viewer.layers['classes'].image = segmentation
+    viewer.layers['instances'].image = instances
+
 
 with app_context():
 
@@ -29,7 +35,8 @@ with app_context():
     viewer.layers['input'].colormap = 'gray'
 
     # add empty labels
-    viewer.add_labels(labels, name='output')
+    viewer.add_labels(labels, name='classes')
+    viewer.add_labels(labels, name='instances')
     viewer.add_labels(labels, name='train')
     viewer.layers['train'].opacity = 0.9
 
