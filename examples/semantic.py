@@ -7,7 +7,8 @@ from napari import Viewer
 from napari.util import app_context
 from skimage import data
 from segmentify.semantic import fit, predict
-
+import napari
+print(napari.__version__)
 
 coins = data.coins()
 labels = np.zeros(coins.shape, dtype=int)
