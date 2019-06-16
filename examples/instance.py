@@ -7,7 +7,7 @@ from napari import Viewer
 from napari.util import app_context
 from skimage import data
 from segmentify import semantic
-from segmentify import instances as instance
+from segmentify import instance
 
 
 coins = data.coins()
