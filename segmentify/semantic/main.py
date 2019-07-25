@@ -122,7 +122,7 @@ def fit(image, labels, multichannel=False):
         image = np.expand_dims(image, 0)
 
     # TODO better way to choose featurizer
-    features = filter_featurize(image)
+    features = unet_featurize(image)
 
     X = features.reshape([-1, features.shape[-1]])
     y = labels.reshape(-1)
@@ -159,7 +159,7 @@ def predict(classifier, image):
 
     # TODO better way to choose featurizer
     # repeated featurization from fit
-    features = filter_featurize(image)
+    features = unet_featurize(image)
 
     X = features.reshape([-1, features.shape[-1]])
 
