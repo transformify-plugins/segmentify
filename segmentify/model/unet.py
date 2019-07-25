@@ -1,5 +1,5 @@
 import torch.nn as nn
-import model.layers.unet_layers as layers
+import segmentify.model.layers.unet_layers as layers
 
 
 class UNet(nn.Module):
