@@ -6,7 +6,7 @@ import numpy as np
 from napari import Viewer, gui_qt
 from skimage import data
 from segmentify import semantic
-from segmentify import instance
+from segmentify import instances
 
 
 coins = data.coins()
@@ -33,7 +33,7 @@ with gui_qt():
         clf = semantic.fit(image, labels)
         segmentation = semantic.predict(clf, image)
         print('classes', len(np.unique(segmentation)))
-        instances = instance.predict(image, segmentation)
+        instances = instances.predict(image, segmentation)
         print('instances', instances.max())
         viewer.layers['classes'].data = segmentation
         viewer.layers['instances'].data = instances
