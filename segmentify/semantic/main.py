@@ -3,7 +3,7 @@ import torch
 import skimage
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils.validation import check_is_fitted
-from segmentify.model import UNet, layers
+from ..model import UNet, layers
 from skimage import feature
 
 def _load_model(pretrained_model):
@@ -16,15 +16,17 @@ def _load_model(pretrained_model):
     """
     # get pretraineod model saved filed path
     ## TODO better way to store and define file path
+    # Use relative path
+    # Use os join
     if pretrained_model == "HPA":
-        model_path = "/home/mars/CZI/segmentify/segmentify/model/saved_model/UNet_hpa_max.pth"
+        model_path = "/home/mars/CZI/segmentify/segmentify/model/saved_model/UNet_hpa_protein.pth"
     elif pretrained_model == "nuclei":
         model_path = "/home/mars/CZI/segmentify/segmentify/model/saved_model/UNet_nuclei.pth"
     else:
         raise ValueError("pretrained model not defined")
 
     # load in saved model                                                     
-    # TODO allow gpu
+    # TODO allow gpu -> issue
     pth = torch.load(model_path)
     model_args = pth['model_args']
     model_state = pth['model_state']
@@ -54,7 +56,7 @@ def unet_featurize(image, pretrained_model="HPA"):
         features: np.ndarray
             One feature vector per pixel in the image
     """
-    # TODO consider multiple images
+    # TODO consider 3D
     model = _load_model(pretrained_model)
 
     image = torch.Tensor(image).float()
@@ -80,7 +82,7 @@ def filter_featurize(image):
         features: np.ndarray
             One feature vector per pixel in the image
     """
-    # TODO consider multiple images
+    # TODO consider 3D images
     image = np.squeeze(image)
     features = np.concatenate([[image],
                                [skimage.filters.gaussian(image,2)],
@@ -114,7 +116,7 @@ def fit(image, labels, multichannel=False):
         Object that can perform classifications
     """
     # TODO model not working with coin example 
-
+    # TODO number of estimators
     clf = RandomForestClassifier(n_estimators=10)
 
     # TODO should this be elsewhere?
