@@ -18,8 +18,7 @@ with gui_qt():
     viewer = Viewer()
 
     # read in sample data
-    # TODO better place to store example
-    nuclei = imageio.imread("./nuclei.png")
+    nuclei = imageio.imread("nuclei.png")
     nuclei = rgb2gray(nuclei)
     labels = np.zeros(nuclei.shape, dtype=int)
 
