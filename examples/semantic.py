@@ -36,8 +36,8 @@ with gui_qt():
         image = viewer.layers['input'].data
         labels = viewer.layers['train'].data
 
-        clf = fit(image, labels)
+        clf, features = fit(image, labels)
 
-        segmentation = predict(clf, image)
+        segmentation = predict(clf, features)
         segmentation = np.squeeze(segmentation)
         viewer.layers['output'].data = segmentation

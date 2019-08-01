@@ -1,9 +1,3 @@
-"""
-TODO:
-- Try out groupnorm
-- Why do we need "Copy and Crop" instead of simply copying
-"""
-
 import torch.nn as nn
 
 
@@ -66,7 +60,6 @@ class UpSampling(nn.Module):
 
         conv_out = self.conv(x)
         output = self.conv_t(conv_out)
-
         output += skip
 
         return output
