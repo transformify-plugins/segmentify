@@ -8,6 +8,7 @@ from skimage.color import rgb2gray
 from segmentify.semantic import fit, predict
 import napari
 import imageio
+import os
 print(napari.__version__)
 
 
@@ -18,7 +19,8 @@ with gui_qt():
     viewer = Viewer()
 
     # read in sample data
-    nuclei = imageio.imread("nuclei.png")
+    example_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "nuclei.png")
+    nuclei = imageio.imread(example_file)
     nuclei = rgb2gray(nuclei)
     labels = np.zeros(nuclei.shape, dtype=int)
 
@@ -38,5 +40,4 @@ with gui_qt():
 
         segmentation = predict(clf, image)
         segmentation = np.squeeze(segmentation)
-        print(segmentation.shape)
         viewer.layers['output'].data = segmentation
