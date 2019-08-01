@@ -54,6 +54,7 @@ def unet_featurize(image, pretrained_model="HPA"):
         features: np.ndarray
             One feature vector per pixel in the image
     """
+
     # TODO consider multiple images
     model = _load_model(pretrained_model)
 
@@ -113,7 +114,11 @@ def fit(image, labels, multichannel=False):
     classifier: sklearn.ensemble.RandomForestClassifier
         Object that can perform classifications
     """
-    # TODO model not working with coin example 
+    # pad input image
+    w,h = image.shape
+    w_padding = int((16-w%16)/2) if w%16 >0 else 0
+    h_padding = int((16-h%16)/2) if h%16 >0 else 0
+    image = np.pad(image, ((w_padding, w_padding),(h_padding, h_padding)), 'constant')
 
     clf = RandomForestClassifier(n_estimators=10)
 
@@ -124,6 +129,12 @@ def fit(image, labels, multichannel=False):
     # TODO better way to choose featurizer
     features = unet_featurize(image)
 
+    # crop out paddings
+    if w_padding > 0:
+        features = features[w_padding:-w_padding]
+    if h_padding > 0:
+        features = features[:,h_padding:-h_padding]
+
     X = features.reshape([-1, features.shape[-1]])
     y = labels.reshape(-1)
     X = X[y != 0]
@@ -132,18 +143,18 @@ def fit(image, labels, multichannel=False):
     if len(X) > 0:
         clf = clf.fit(X, y)
 
-    return clf
+    return clf, features
 
 
-def predict(classifier, image):
+def predict(classifier, features):
     """Train a pixel classifier.
 
     Parameters
     ----------
     classifier: sklearn.ensemble.RandomForestClassifier
         Object that can perform classifications
-    image: np.ndarray
-        Image data to be classified.
+    features: np.ndarray
+        featurized image
     multichannel: bool, optional
         If image data is multichannel.
 
@@ -153,20 +164,12 @@ def predict(classifier, image):
         Classification, where integer values correspond to class membership.
     """
 
-    # TODO should this be elsewhere?
-    while len(image.shape) < 4:
-        image = np.expand_dims(image, 0)
-
-    # TODO better way to choose featurizer
-    # repeated featurization from fit
-    features = unet_featurize(image)
-
     X = features.reshape([-1, features.shape[-1]])
 
     try:
         y = classifier.predict(X)
-        labels = y.reshape(image.shape)
+        labels = y.reshape(features.shape[:-1])
     except:
         # If classifer has not yet been fit return zeros
-        labels = np.zeros(image.shape, dtype=int)
+        labels = np.zeros(features.shape[:-1], dtype=int)
     return labels
