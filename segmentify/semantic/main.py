@@ -65,8 +65,8 @@ def unet_featurize(image, pretrained_model="HPA"):
     with torch.no_grad():
         features = model(image)
 
-    features = features.squeeze().numpy()
-    features = np.transpose(features, (1,2,0))
+    features = features.numpy()
+    features = np.transpose(features, (0,2,3,1))
     return features
 
 
@@ -117,16 +117,20 @@ def fit(image, labels, multichannel=False):
         Object that can perform classifications
     """
     # pad input image
-    w,h = image.shape
+    w,h = image.shape[-2:]
     w_padding = int((16-w%16)/2) if w%16 >0 else 0
     h_padding = int((16-h%16)/2) if h%16 >0 else 0
-    image = np.pad(image, ((w_padding, w_padding),(h_padding, h_padding)), 'constant')
+    if len(image.shape) == 3:
+        image = np.pad(image, ((0,0),(w_padding, w_padding),(h_padding, h_padding)), 'constant')
+    elif len(image.shape) == 2:
+        image = np.pad(image, ((w_padding, w_padding),(h_padding, h_padding)), 'constant')
 
     clf = RandomForestClassifier(n_estimators=10)
 
     # TODO should this be elsewhere?
     while len(image.shape) < 4:
         image = np.expand_dims(image, 0)
+    image = np.transpose(image, (1,0,2,3))
 
     # TODO better way to choose featurizer
     features = unet_featurize(image)
