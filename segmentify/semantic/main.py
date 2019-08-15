@@ -55,8 +55,6 @@ def unet_featurize(image, pretrained_model="HPA"):
         features: np.ndarray
             One feature vector per pixel in the image
     """
-    
-    # TODO consider multiple images
 
     model = _load_model(pretrained_model)
 
@@ -83,14 +81,13 @@ def filter_featurize(image):
         features: np.ndarray
             One feature vector per pixel in the image
     """
-    # TODO consider 3D images
     image = np.squeeze(image)
     features = np.concatenate([[image],
                                [skimage.filters.gaussian(image,2)],
                                [skimage.filters.gaussian(image,4)],
                                [skimage.filters.sobel(image)],
                                [skimage.filters.laplace(image)],
-                               [skimage.filters.gabor(image, 0.1)[0]],
+                               [skimage.filters.gabor(image, 0.6)[0]],
                                [skimage.filters.gabor(image, 0.6)[1]],
                                [feature.canny(image, 1,0)]], axis=0)
     features = np.moveaxis(features, 0, -1)
