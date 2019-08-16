@@ -95,7 +95,7 @@ def filter_featurize(image):
 
 
 
-def fit(image, labels, multichannel=False, featurizer=="HPA"):
+def fit(image, labels, multichannel=False, featurizer="HPA"):
     """Train a pixel classifier.
 
     Parameters
@@ -131,6 +131,7 @@ def fit(image, labels, multichannel=False, featurizer=="HPA"):
 
     # TODO better way to choose featurizer
     if featurizer == "filter":
+        print("filter")
         features = filter_featurize(image)
     else:
         features = unet_featurize(image, featurizer)
