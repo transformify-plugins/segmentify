@@ -1,5 +1,11 @@
-napari >= 0.0.8
+imageio>=2.5.0
+napari>=0.1.4
+numba>=0.45.1
 numpy>=1.10.0
 scipy>=1.2.0
 scikit-image>=0.15.0
 scikit-learn>=0.21.2
+vispy>=0.6.1
+torch>=1.2.0
+torchvision>=1.2.0
+
