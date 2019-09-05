@@ -40,7 +40,7 @@ with gui_qt():
     viewer = Viewer(img)
 ```
 
-An example can be found [here](./examples/) TODO
+An example can be found [here](./examples/viewer_example.py)
 
 ## Featurization
 
