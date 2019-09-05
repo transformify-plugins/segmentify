@@ -95,7 +95,7 @@ def filter_featurize(image):
 
 
 
-def fit(image, labels, multichannel=False):
+def fit(image, labels, multichannel=False, featurizer="HPA"):
     """Train a pixel classifier.
 
     Parameters
@@ -130,7 +130,12 @@ def fit(image, labels, multichannel=False):
     image = np.transpose(image, (1,0,2,3))
 
     # TODO better way to choose featurizer
-    features = unet_featurize(image)
+    if featurizer == "filter":
+        print("filter")
+        features = filter_featurize(image)
+    else:
+        features = unet_featurize(image, featurizer)
+
 
     # crop out paddings
     if w_padding > 0:
