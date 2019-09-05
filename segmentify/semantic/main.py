@@ -7,26 +7,21 @@ from sklearn.utils.validation import check_is_fitted
 from ..model import UNet, layers
 from skimage import feature
 
-def _load_model(pretrained_model):
+def _load_model(featurizer_path):
     """Load the featurization model
 
     Parameters
     ----------
-        model_path: str
+        featurizer_path: str
             Path to the saved model file
+
+    Returns
+    -------
+    The loaded PyTorch model
     """
-    ## TODO better way to store and define file path
-    file_name = os.path.abspath(os.path.dirname(__file__))
-    if pretrained_model == "HPA":
-        model_path = os.path.join(file_name,"..","model","saved_model","UNet_hpa_max.pth")
-    elif pretrained_model == "nuclei":
-        model_path = os.path.join(file_name,"..","model","saved_model","UNet_nuclei.pth")
-    else:
-        raise ValueError("pretrained model not defined")
 
     # load in saved model                                                     
-    # TODO allow gpu -> issue
-    pth = torch.load(model_path)
+    pth = torch.load(featurizer_path)
     model_args = pth['model_args']
     model_state = pth['model_state']
     model = UNet(**model_args)
@@ -40,14 +35,14 @@ def _load_model(pretrained_model):
     return model
 
 
-def unet_featurize(image, pretrained_model="HPA"):
+def unet_featurize(image, featurizer_path):
     """Featurize pixels in an image using pretrained UNet
 
     Parameters
     ----------
         image: numpy.ndarray
             Image data to be featurized
-        pretrained_model: str (HPA)
+        featurizer_path: str (HPA)
             name of the pretraine model to use for featurization
 
     Returns
@@ -56,7 +51,7 @@ def unet_featurize(image, pretrained_model="HPA"):
             One feature vector per pixel in the image
     """
 
-    model = _load_model(pretrained_model)
+    model = _load_model(featurizer_path)
 
     image = torch.Tensor(image).float()
 
@@ -95,7 +90,7 @@ def filter_featurize(image):
 
 
 
-def fit(image, labels, multichannel=False):
+def fit(image, labels, featurizer="../model/saved_model/UNet_hpa_4c_mean_8.pth"):
     """Train a pixel classifier.
 
     Parameters
@@ -113,6 +108,7 @@ def fit(image, labels, multichannel=False):
     classifier: sklearn.ensemble.RandomForestClassifier
         Object that can perform classifications
     """
+    print(featurizer)
     # pad input image
     w,h = image.shape[-2:]
     w_padding = int((16-w%16)/2) if w%16 >0 else 0
@@ -122,15 +118,16 @@ def fit(image, labels, multichannel=False):
     elif len(image.shape) == 2:
         image = np.pad(image, ((w_padding, w_padding),(h_padding, h_padding)), 'constant')
 
-    clf = RandomForestClassifier(n_estimators=10)
-
-    # TODO should this be elsewhere?
+    # make sure image has four dimentions (b,c,w,h)
     while len(image.shape) < 4:
         image = np.expand_dims(image, 0)
     image = np.transpose(image, (1,0,2,3))
 
-    # TODO better way to choose featurizer
-    features = unet_featurize(image)
+    # choose filter or unet featurizer
+    if featurizer == "filter":
+        features = filter_featurize(image)
+    else:
+        features = unet_featurize(image, featurizer)
 
     # crop out paddings
     if w_padding > 0:
@@ -138,11 +135,14 @@ def fit(image, labels, multichannel=False):
     if h_padding > 0:
         features = features[:,h_padding:-h_padding]
 
+    # reshape and extract data
     X = features.reshape([-1, features.shape[-1]])
     y = labels.reshape(-1)
     X = X[y != 0]
     y = y[y != 0]
 
+    # define and fit classifier
+    clf = RandomForestClassifier(n_estimators=10)
     if len(X) > 0:
         clf = clf.fit(X, y)
 
@@ -170,9 +170,15 @@ def predict(classifier, features):
     X = features.reshape([-1, features.shape[-1]])
 
     try:
+        # get prediction and probability
         y = classifier.predict(X)
+        prob = classifier.predict_proba(X)
         labels = y.reshape(features.shape[:-1])
+        prob_shape = features.shape[:-1] + (prob.shape[-1], )
+        prob = prob.reshape(prob_shape)
+
     except:
         # If classifer has not yet been fit return zeros
         labels = np.zeros(features.shape[:-1], dtype=int)
-    return labels
+        prob = np.zeros(features.shape[:-1], dtype=int)
+    return labels, prob
