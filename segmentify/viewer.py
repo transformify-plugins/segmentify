@@ -67,10 +67,6 @@ class Viewer(NapariViewer):
         self.cur_featurizer = next(self.featurizers)
         self.status = self.cur_featurizer.split("/")[-1]
 
-        clf, features = fit(self.img, self.labels, featurizer=self.cur_featurizer)
-        self.add_image(features[0].transpose(2, 0, 1), name='features')
-        self.layers['features'].visible = False
-
         # key-bindings
         self.bind_key('Shift-S', self.segment)
         self.bind_key('Shift-H', self.show_heatmap)
@@ -296,3 +292,4 @@ class Viewer(NapariViewer):
             return np.stack(processed_imgs, 0)
         else:
             return morphology.remove_small_holes(viewer.active_layer.data.astype(bool)).astype(int)
+
