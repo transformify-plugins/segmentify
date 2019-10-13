@@ -40,6 +40,9 @@ class Viewer(NapariViewer):
         self.background_label = 1
         self.labels = np.zeros(self.img.shape, dtype=int)
         self.add_image(self.img, name='input')
+        self.add_image(np.zeros((8,) + self.img.shape, dtype=int), name='features', contrast_limits=[-12, 12])
+        self.layers['features'].visible = False
+
         self.selem = morphology.selem.square(3)
         self.prob = None
         self.segmentation = None
@@ -66,6 +69,9 @@ class Viewer(NapariViewer):
         self.featurizers = cycle(featurizer_paths)
         self.cur_featurizer = next(self.featurizers)
         self.status = self.cur_featurizer.split("/")[-1]
+
+        clf, features = fit(self.img, self.labels, featurizer=self.cur_featurizer)
+        self.layers['features'].data = features[0].transpose(2, 0, 1)
 
         # key-bindings
         self.bind_key('Shift-S', self.segment)
@@ -151,6 +157,7 @@ class Viewer(NapariViewer):
 
         # fit and predict
         clf, features = fit(image, labels, featurizer=self.cur_featurizer)
+        self.layers['features'].data = features[0].transpose(2, 0, 1)
         segmentation, self.prob = predict(clf, features)
 
         # show prediction
@@ -190,6 +197,8 @@ class Viewer(NapariViewer):
         """
         self.cur_featurizer = next(self.featurizers)
         viewer.status = self.cur_featurizer.split("/")[-1]
+        clf, features = fit(self.img, self.labels, featurizer=self.cur_featurizer)
+        self.layers['features'].data = features[0].transpose(2, 0, 1)
 
 
     def closing(self, viewer):
@@ -292,4 +301,3 @@ class Viewer(NapariViewer):
             return np.stack(processed_imgs, 0)
         else:
             return morphology.remove_small_holes(viewer.active_layer.data.astype(bool)).astype(int)
-
