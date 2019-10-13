@@ -20,14 +20,14 @@ def _load_model(featurizer_path):
     The loaded PyTorch model
     """
 
-    # load in saved model                                                     
+    # load in saved model
     pth = torch.load(featurizer_path)
     model_args = pth['model_args']
     model_state = pth['model_state']
     model = UNet(**model_args)
     model.load_state_dict(model_state)
 
-    # remove last layer and activation                                        
+    # remove last layer and activation
     model.segment = layers.Identity()
     model.activate = layers.Identity()
     model.eval()
@@ -108,7 +108,6 @@ def fit(image, labels, featurizer="../model/saved_model/UNet_hpa_4c_mean_8.pth")
     classifier: sklearn.ensemble.RandomForestClassifier
         Object that can perform classifications
     """
-    print(featurizer)
     # pad input image
     w,h = image.shape[-2:]
     w_padding = int((16-w%16)/2) if w%16 >0 else 0
@@ -129,6 +128,8 @@ def fit(image, labels, featurizer="../model/saved_model/UNet_hpa_4c_mean_8.pth")
     else:
         features = unet_featurize(image, featurizer)
 
+    #features = features[0]
+
     # crop out paddings
     if w_padding > 0:
         features = features[w_padding:-w_padding]
@@ -138,6 +139,7 @@ def fit(image, labels, featurizer="../model/saved_model/UNet_hpa_4c_mean_8.pth")
     # reshape and extract data
     X = features.reshape([-1, features.shape[-1]])
     y = labels.reshape(-1)
+
     X = X[y != 0]
     y = y[y != 0]
 

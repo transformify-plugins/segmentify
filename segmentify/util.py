@@ -127,4 +127,3 @@ def _norm_entropy(probs):
         else:
             entropy += 0
     return - entropy / len(probs)
-

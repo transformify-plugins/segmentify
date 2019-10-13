@@ -4,7 +4,7 @@ from distutils.core import setup
 setup(
     name='segmentify',
     packages=[],
-    version='0.0.0',
+    version='0.0.1',
     description='Python image segmentation plugin.',
     maintainer='Nicholas Sofroniew',
     maintainer_email='sofroniewn@gmail.com',
