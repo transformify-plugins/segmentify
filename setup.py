@@ -1,6 +1,17 @@
 # !/usr/bin/env python
 
 from distutils.core import setup
+
+
+def parse_requirements_file(filename):
+    with open(filename) as fid:
+        requires = [l.strip() for l in fid.readlines() if l]
+
+    return requires
+
+INSTALL_REQUIRES = parse_requirements_file('requirements.txt')
+print(INSTALL_REQUIRES)
+
 setup(
     name='segmentify',
     packages=[],
@@ -31,4 +42,5 @@ setup(
         'Operating System :: Unix',
         'Operating System :: MacOS',
     ],
+    install_requires=INSTALL_REQUIRES,
 )
