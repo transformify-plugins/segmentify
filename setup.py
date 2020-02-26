@@ -1,6 +1,7 @@
 # !/usr/bin/env python
 
 from distutils.core import setup
+from setuptools import find_packages
 
 
 def parse_requirements_file(filename):
@@ -10,11 +11,10 @@ def parse_requirements_file(filename):
     return requires
 
 INSTALL_REQUIRES = parse_requirements_file('requirements.txt')
-print(INSTALL_REQUIRES)
 
 setup(
     name='segmentify',
-    packages=[],
+    packages=find_packages(),
     version='0.0.0',
     description='Python image segmentation plugin.',
     maintainer='Nicholas Sofroniew',
@@ -43,4 +43,6 @@ setup(
         'Operating System :: MacOS',
     ],
     install_requires=INSTALL_REQUIRES,
+    include_package_data=True,
+    entry_points={'console_scripts': ['segmentify=segmentify.__main__:main']},
 )
