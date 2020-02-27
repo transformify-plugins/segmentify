@@ -1,0 +1,2 @@
+indlude LICENSE
+include segmentify/model/saved_model/*.pth

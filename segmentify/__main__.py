@@ -8,8 +8,12 @@ from napari import gui_qt
 from segmentify import Viewer, util
 
 
-def main(args):
+def main(args=None):
     """The main Command Line Interface for Segmentify"""
+    if args is None:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("images", nargs="*", type=str, help="Image to view and segment.")
+        args = parser.parse_args()
 
     # parse in images
     imgs = [util.parse_img(img) for img in args.images]
@@ -20,13 +24,8 @@ def main(args):
         imgs = np.array(imgs)
 
     with gui_qt():
-        viewer = Viewer(imgs, heatmap=args.heatmap)
+        viewer = Viewer(imgs)
 
 
 if __name__ == "__main__":
-    # parser
-    parser = argparse.ArgumentParser()
-    parser.add_argument("images", nargs="*", type=str, help="Image to view and segment.")
-    args = parser.parse_args()
-
-    main(args)
+    main()
