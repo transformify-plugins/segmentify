@@ -15,7 +15,7 @@ INSTALL_REQUIRES = parse_requirements_file('requirements.txt')
 setup(
     name='segmentify',
     packages=find_packages(),
-    version='0.0.0',
+    version='0.1.0',
     description='Python image segmentation plugin.',
     maintainer='Nicholas Sofroniew',
     maintainer_email='sofroniewn@gmail.com',

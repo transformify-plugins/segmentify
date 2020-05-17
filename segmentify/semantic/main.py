@@ -108,32 +108,35 @@ def fit(image, labels, featurizer="../model/saved_model/UNet_hpa_4c_mean_8.pth")
     classifier: sklearn.ensemble.RandomForestClassifier
         Object that can perform classifications
     """
-    print(featurizer)
     # pad input image
     w,h = image.shape[-2:]
+
     w_padding = int((16-w%16)/2) if w%16 >0 else 0
     h_padding = int((16-h%16)/2) if h%16 >0 else 0
-    if len(image.shape) == 3:
-        image = np.pad(image, ((0,0),(w_padding, w_padding),(h_padding, h_padding)), 'constant')
-    elif len(image.shape) == 2:
-        image = np.pad(image, ((w_padding, w_padding),(h_padding, h_padding)), 'constant')
+
+    padding = (0,) * (image.ndim - 2) + (w_padding, h_padding)
+    padded_image = np.pad(image, (padding), 'constant')
 
     # make sure image has four dimentions (b,c,w,h)
-    while len(image.shape) < 4:
-        image = np.expand_dims(image, 0)
-    image = np.transpose(image, (1,0,2,3))
+    while len(padded_image.shape) < 4:
+        padded_image = np.expand_dims(padded_image, 0)
+    padded_image = np.transpose(padded_image, (1,0,2,3))
 
     # choose filter or unet featurizer
     if featurizer == "filter":
-        features = filter_featurize(image)
+        padded_features = filter_featurize(padded_image)
     else:
-        features = unet_featurize(image, featurizer)
+        padded_features = unet_featurize(padded_image, featurizer)
 
     # crop out paddings
     if w_padding > 0:
-        features = features[w_padding:-w_padding]
+        features = padded_features[:, w_padding:-w_padding]
+    else:
+        features = padded_features
     if h_padding > 0:
-        features = features[:,h_padding:-h_padding]
+        features = features[:, :, h_padding:-h_padding]
+    else:
+        features = features
 
     # reshape and extract data
     X = features.reshape([-1, features.shape[-1]])

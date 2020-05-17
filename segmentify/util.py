@@ -1,38 +1,10 @@
-import imageio
+import os
 import numpy as np
 import numba
 import math
 from scipy import stats
+import enum
 
-def parse_img(img):
-    """parse in a input image into the standardized format for segmentify
-
-    Parameters
-    ----------
-    img : np.array
-        The image to be parsed
-
-    Returns
-    -------
-    The parsed image
-    """
-
-    # read in image
-    img = imageio.imread(img)
-
-    # check dimention order
-    if img.shape[-1] <=5:
-        img = np.transpose(img, (2,0,1))
-
-    # normalize to 0 - 1
-    if img.max() > 1:
-        img = img / 255.
-
-    # use only one dimention
-    if img.shape[0] > 1:
-        img = np.mean(img, axis=0)
-
-    return img
 
 @numba.jit(nopython=True, fastmath=True, cache=True)
 def _get_mode(target_region):
@@ -57,7 +29,7 @@ def _get_mode(target_region):
     return target
 
 @numba.jit(fastmath=True, cache=True)
-def _erode_img(img, target_label):
+def erode_img(img, target_label):
     """multi-class image erosion
 
     This function performs a multi class by finding the mode in a sliding kernel
@@ -107,7 +79,7 @@ def _erode_img(img, target_label):
     return output_img
 
 
-def _norm_entropy(probs):
+def norm_entropy(probs):
     """get the normalized entropy based on a list of proabilities
 
     Parameters
@@ -128,3 +100,12 @@ def _norm_entropy(probs):
             entropy += 0
     return - entropy / len(probs)
 
+
+featurizer_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)),"model","saved_model")
+featurizer_paths = os.listdir(featurizer_dir)
+featurizer_paths = sorted([os.path.join(featurizer_dir,path) for path in featurizer_paths])
+featurizer_dict = {}
+for fp in featurizer_paths:
+    featurizer_dict[os.path.basename(fp)] = fp
+featurizer_dict['filter'] = 'filter'
+Featurizers = enum.Enum('Featurizers', featurizer_dict)
