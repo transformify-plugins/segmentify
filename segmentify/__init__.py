@@ -1,5 +1,3 @@
-__version__ = '0.0.0'
+__version__ = '0.1.0'
 
-from .viewer import Viewer
-from . import util
-from napari import gui_qt
+from .gui import segmentation
