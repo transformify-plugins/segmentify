@@ -29,7 +29,7 @@ def _get_mode(target_region):
     return target
 
 @numba.jit(fastmath=True, cache=True)
-def _erode_img(img, target_label):
+def erode_img(img, target_label):
     """multi-class image erosion
 
     This function performs a multi class by finding the mode in a sliding kernel
@@ -79,7 +79,7 @@ def _erode_img(img, target_label):
     return output_img
 
 
-def _norm_entropy(probs):
+def norm_entropy(probs):
     """get the normalized entropy based on a list of proabilities
 
     Parameters
