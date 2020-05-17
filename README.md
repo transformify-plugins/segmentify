@@ -2,7 +2,7 @@
 
 Segmentify is an interactive and general purpose cell segmentation plugin for the multi-dimentional image viewer [Napari](https://github.com/napari/napari).
 
- <p align=center"><img src="figs/intro.png" /></p>
+ <p align=center"><img src="figs/segmentify.gif" /></p>
 
 In the example above, the user is using segmentify to segment out the nucleus, cytoplasm and the background for all the cells in the image. The user uses the paint brush tool to label some training examples on the **labels layer**. The entire image is featurized using a pretrained featurizer, and the selected examples are used to train a Random Forest Classifier. Lastly, the trained classifier is used to predict the label for all the remaining unlabeled pixels, and the segmentation output is displayed at the **segmentation labels layer**.
 
