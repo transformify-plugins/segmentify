@@ -113,9 +113,12 @@ def fit(image, labels, featurizer="../model/saved_model/UNet_hpa_4c_mean_8.pth")
 
     w_padding = int((16-w%16)/2) if w%16 >0 else 0
     h_padding = int((16-h%16)/2) if h%16 >0 else 0
+    w_padding_offset = (16-w%16) % 2
+    h_padding_offset = (16-h%16) % 2
 
-    padding = (0,) * (image.ndim - 2) + (w_padding, h_padding)
-    padded_image = np.pad(image, (padding), 'constant')
+    padding = ((0, 0), ) * (image.ndim - 2) + ((w_padding, w_padding+w_padding_offset), 
+                                               (h_padding, h_padding+h_padding_offset))
+    padded_image = np.pad(image, padding, 'constant')
 
     # make sure image has four dimentions (b,c,w,h)
     while len(padded_image.shape) < 4:
@@ -130,11 +133,11 @@ def fit(image, labels, featurizer="../model/saved_model/UNet_hpa_4c_mean_8.pth")
 
     # crop out paddings
     if w_padding > 0:
-        features = padded_features[:, w_padding:-w_padding]
+        features = padded_features[:, w_padding:-w_padding-w_padding_offset]
     else:
         features = padded_features
     if h_padding > 0:
-        features = features[:, :, h_padding:-h_padding]
+        features = features[:, :, h_padding:-h_padding-h_padding_offset]
     else:
         features = features
 
